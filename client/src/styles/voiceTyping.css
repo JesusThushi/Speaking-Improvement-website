@@ -1,0 +1,509 @@
+/* =========================
+   VoiceTyping UI — Dark "Detect AI" style
+   (Drop-in replacement for voiceTyping.css)
+   ========================= */
+
+:root {
+  --bg-0: #05070b;
+  --bg-1: #070a10;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-2: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-2: rgba(255, 255, 255, 0.10);
+
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.65);
+  --muted-2: rgba(255, 255, 255, 0.45);
+
+  --blue: #2f89ff;
+  --blue-2: #1f6fe5;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+
+  --radius-xl: 22px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+
+  --ring: rgba(47, 137, 255, 0.32);
+  --ring2: rgba(47, 137, 255, 0.18);
+
+  --focus: 0 0 0 4px rgba(47, 137, 255, 0.22);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.vt-screen {
+  min-height: 100vh;
+  padding: 28px 16px;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 50% 20%, rgba(47, 137, 255, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 15% 70%, rgba(47, 137, 255, 0.10), transparent 55%),
+    linear-gradient(180deg, var(--bg-0), var(--bg-1));
+}
+
+/* Center card container */
+.vt-mid {
+  max-width: 860px;               /* a bit wider, like the screenshot */
+  margin: 26px auto 0;
+}
+
+/* since header removed, bring UI up a bit */
+.vt-mid-noheader {
+  margin-top: 10px;
+}
+
+/* =========================
+   PAGE HEADING
+   ========================= */
+
+.vt-heading-wrap{
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.vt-heading{
+  font-size:32px;
+  font-weight:900;
+  letter-spacing:0.4px;
+  margin:0;
+  background: linear-gradient(90deg,#ffffff,#bcd7ff 60%,#4da3ff);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.vt-heading-line{
+  width:140px;
+  height:3px;
+  margin:10px auto 0;
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,#2f89ff,transparent);
+  opacity:.9;
+}
+
+/* responsive */
+@media(max-width:520px){
+  .vt-heading{
+    font-size:24px;
+  }
+  .vt-heading-line{
+    width:100px;
+  }
+}
+
+/* =========================
+   TEXT BAR (Upload-like panel)
+   ========================= */
+
+.vt-textbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, 0.045));
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.vt-textbar::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(600px 120px at 50% 0%, rgba(47, 137, 255, 0.22), transparent 60%);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.vt-textbar-multiline {
+  min-height: 140px;
+  max-height: 220px;
+  overflow: hidden;
+}
+
+.vt-text {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* IMPORTANT: full text (no ellipsis) */
+.vt-text-full {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-y: auto;
+  max-height: 184px;
+  padding-right: 8px;
+}
+
+/* nicer scrollbar (optional) */
+.vt-text-full::-webkit-scrollbar {
+  width: 8px;
+}
+.vt-text-full::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+.vt-text-full::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vt-placeholder {
+  opacity: 0.8;
+  color: var(--muted);
+}
+
+/* Trash icon button */
+.vt-iconbtn {
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--border-2);
+  cursor: pointer;
+  border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.vt-iconbtn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vt-iconbtn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+.vt-iconbtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* =========================
+   CONTROLS ROW (Start/Stop + Analyze)
+   ========================= */
+
+.vt-mini-controls {
+  margin: 18px auto 0;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Buttons (also used by Analyze) */
+.vt-mini-btn {
+  height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: 999px; /* pill like screenshot controls */
+  border: 1px solid var(--border);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.vt-mini-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+.vt-mini-btn:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+.vt-mini-btn:focus {
+  outline: none;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35), var(--focus);
+}
+
+.vt-mini-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Make first 2 icon buttons square-ish if you like */
+.vt-mini-btn[title="Start"],
+.vt-mini-btn[title="Stop"] {
+  width: 52px;
+  padding: 0;
+  font-size: 18px;
+}
+
+/* Analyze button looks primary (blue) */
+.vt-mini-btn:not([title="Start"]):not([title="Stop"]) {
+  border-color: rgba(47, 137, 255, 0.40);
+  background: linear-gradient(180deg, rgba(47, 137, 255, 0.95), rgba(31, 111, 229, 0.95));
+  color: #071018;
+}
+
+.vt-mini-btn:not([title="Start"]):not([title="Stop"]):hover {
+  background: linear-gradient(180deg, rgba(47, 137, 255, 1), rgba(31, 111, 229, 1));
+  transform: translateY(-1px);
+}
+
+/* =========================
+   TIMER + STATUS
+   ========================= */
+
+.timer-status {
+  text-align: center;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* =========================
+   MIC AREA (Center focus)
+   ========================= */
+
+.vt-mic-area {
+  position: relative;
+  height: 320px;
+  display: grid;
+  place-items: center;
+  margin-top: 18px;
+}
+
+/* Rings */
+.vt-ring {
+  position: absolute;
+  border-radius: 999px;
+  border: 2px solid var(--ring2);
+  opacity: 0;
+  transform: scale(0.96);
+  filter: drop-shadow(0 0 18px rgba(47, 137, 255, 0.14));
+}
+
+.vt-r1 { width: 150px; height: 150px; border-color: var(--ring); }
+.vt-r2 { width: 215px; height: 215px; }
+.vt-r3 { width: 290px; height: 290px; }
+
+.vt-pulse {
+  opacity: 1;
+  animation: vtPulse 1.35s ease-in-out infinite;
+}
+
+.vt-r2.vt-pulse { animation-delay: 0.15s; }
+.vt-r3.vt-pulse { animation-delay: 0.30s; }
+
+@keyframes vtPulse {
+  0%   { transform: scale(0.92); opacity: 0.16; }
+  50%  { transform: scale(1.06); opacity: 0.46; }
+  100% { transform: scale(0.92); opacity: 0.16; }
+}
+
+/* Mic button */
+.vt-mic-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  border: 1px solid rgba(47, 137, 255, 0.35);
+  cursor: pointer;
+  background:
+    radial-gradient(70px 70px at 30% 30%, rgba(255, 255, 255, 0.20), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  color: var(--text);
+  font-size: 44px;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.55),
+    0 0 0 10px rgba(47, 137, 255, 0.08);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.vt-mic-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(47, 137, 255, 0.55);
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.60),
+    0 0 0 12px rgba(47, 137, 255, 0.10);
+}
+
+.vt-mic-btn:active {
+  transform: translateY(0px) scale(0.97);
+}
+
+.vt-mic-live {
+  transform: scale(1.03);
+  border-color: rgba(47, 137, 255, 0.75);
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.65),
+    0 0 0 14px rgba(47, 137, 255, 0.14);
+}
+
+.vt-mic-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Bottom helper text */
+.vt-bottom {
+  text-align: center;
+  margin-top: -10px;
+}
+
+.vt-speak {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+.vt-helper {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* =========================
+   Analysis result (your inline div uses style=...white)
+   Optional: make it look like a small dark card if you later add a class.
+   ========================= */
+
+/* =========================
+   Corrected paragraph box (if you use it later)
+   ========================= */
+
+.vt-correctedBox {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+.vt-correctedTitle {
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.vt-correctedText {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* =========================
+   POPUP MODAL (matches dark theme)
+   ========================= */
+
+.vt-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.66);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 18px;
+  backdrop-filter: blur(6px);
+}
+
+.vt-popup {
+  width: min(680px, 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.65);
+}
+
+.vt-popup-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.vt-popup-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.vt-popup-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 12px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  max-height: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.vt-popup-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.vt-popup-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.vt-popup-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.vt-popup-btn:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+.vt-popup-btn.vt-apply {
+  border-color: rgba(47, 137, 255, 0.55);
+  background: linear-gradient(180deg, rgba(47, 137, 255, 0.95), rgba(31, 111, 229, 0.95));
+  color: #071018;
+}
+
+.vt-popup-btn.vt-keep {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+/* =========================
+   Small responsive tweaks
+   ========================= */
+@media (max-width: 520px) {
+  .vt-mid { margin-top: 18px; }
+  .vt-textbar { padding: 14px; border-radius: 18px; }
+  .vt-mic-area { height: 300px; }
+  .vt-mic-btn { width: 110px; height: 110px; font-size: 42px; }
+}
