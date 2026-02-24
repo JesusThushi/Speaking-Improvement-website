@@ -1,170 +1,92 @@
+// server/index.js
 import express from "express";
 import cors from "cors";
 import multer from "multer";
 import fs from "fs";
-import { exec } from "child_process";
-
+import path from "path";
+import { execFile } from "child_process";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(cors());
-app.use(express.json()); // ✅ for JSON body (grammar-check + rewrite)
 
-const upload = multer({ dest: "uploads/" });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const upload = multer({ dest: uploadDir });
+
+// ✅ Flexible filler detection (um/umm/ummm, uh/uhh, er/err, erm/ermm)
+const FILLER_PATTERNS = [
+  { key: "um", re: /\bum+\b/gi },
+  { key: "uh", re: /\buh+\b/gi },
+  { key: "erm", re: /\berm+\b/gi },
+  { key: "er", re: /\ber+\b/gi },
+  { key: "ah", re: /\bah+\b/gi },
+  { key: "like", re: /\blike\b/gi },
+  { key: "you know", re: /\byou\s+know\b/gi },
+  { key: "i mean", re: /\bi\s+mean\b/gi },
+  { key: "actually", re: /\bactually\b/gi },
+  { key: "basically", re: /\bbasically\b/gi },
+  { key: "literally", re: /\bliterally\b/gi },
+  { key: "okay", re: /\bokay\b/gi },
+  { key: "well", re: /\bwell\b/gi },
+  { key: "right", re: /\bright\b/gi },
+];
+
+function countFillers(text) {
+  const t = (text || "").toLowerCase();
+  const counts = {};
+  let total = 0;
+
+  for (const p of FILLER_PATTERNS) {
+    const m = t.match(p.re);
+    const c = m ? m.length : 0;
+    counts[p.key] = c;
+    total += c;
+  }
+  return { total, counts };
+}
 
 app.get("/", (req, res) => {
-  res.send("Local Whisper backend running");
+  res.json({ ok: true, message: "Whisper backend running" });
 });
 
-app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
-  if (!req.file) return res.json({ text: "" });
+app.post("/api/transcribe", upload.single("audio"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  const audioPath = req.file.path;
+  const audioPath = path.resolve(req.file.path);
+  const scriptPath = path.resolve(__dirname, "transcribe.py");
+  const PYTHON_CMD = "python";
 
-  exec(`python transcribe.py ${audioPath}`, (error, stdout, stderr) => {
-    // ✅ safe delete
-    try { fs.unlinkSync(audioPath); } catch {}
+  execFile(
+    PYTHON_CMD,
+    [scriptPath, audioPath],
+    { maxBuffer: 20 * 1024 * 1024 },
+    (error, stdout, stderr) => {
+      try { fs.unlinkSync(audioPath); } catch {}
 
-    if (error) {
-      console.error("Python error:", error);
-      console.error("stderr:", stderr);
-      return res.json({ text: "" });
+      if (error) {
+        console.error("TRANSCRIBE ERROR:", error);
+        console.error("STDERR:", stderr);
+        return res.status(500).json({
+          error: "Python transcribe failed",
+          details: (stderr || "").toString().slice(0, 2000) || String(error),
+        });
+      }
+
+      const text = (stdout || "").trim();
+      const fillers = countFillers(text);
+
+      return res.json({ text, fillers });
     }
-
-    res.json({
-      text: stdout.trim(),
-    });
-  });
+  );
 });
 
-// ✅ Analyze API
-app.post("/api/analyze-text", async (req, res) => {
-  const { text } = req.body;
-
-  if (!text || !text.trim()) {
-    return res.json({
-      score: "",
-      vocabulary: { nouns: 0, verbs: 0, adjectives: 0 },
-    });
-  }
-
-  const child = exec("python analyze_text.py", (error, stdout, stderr) => {
-    if (error) {
-      console.error("analyze_text.py error:", error);
-      console.error("stderr:", stderr);
-      return res.status(500).json({
-        score: "",
-        vocabulary: { nouns: 0, verbs: 0, adjectives: 0 },
-      });
-    }
-
-    try {
-      const data = JSON.parse(stdout.trim());
-      return res.json(data);
-    } catch (e) {
-      console.error("Invalid JSON from python:", stdout);
-      return res.status(500).json({
-        score: "",
-        vocabulary: { nouns: 0, verbs: 0, adjectives: 0 },
-      });
-    }
-  });
-
-  child.stdin.write(text.trim());
-  child.stdin.end();
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found", path: req.originalUrl });
 });
 
-// ✅ Rewrite endpoint (Node → Ollama local AI)
-app.post("/api/rewrite", async (req, res) => {
-  const { text } = req.body;
-
-  if (!text || !text.trim()) {
-    return res.json({ rewritten: "" });
-  }
-
-  try {
-    const prompt = `
-Rewrite this spoken English into correct, natural written English.
-Rules:
-- Do NOT add new information.
-- Do NOT change the meaning.
-- Remove broken repeats like: "Ate. Ate."
-- Keep it simple.
-- Output ONLY the corrected text (no quotes, no explanation).
-
-Text:
-${text.trim()}
-`.trim();
-
-    const r = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "qwen2:1.5b",
-        prompt,
-        stream: false,
-      }),
-    });
-
-    const data = await r.json();
-    const rewritten = (data?.response || "").trim();
-
-    res.json({ rewritten: rewritten || text.trim() });
-  } catch (err) {
-    console.error("Ollama rewrite error:", err);
-    res.status(500).json({ rewritten: text.trim() });
-  }
-});
-
-// ✅ Grammar check endpoint (Node → Java LanguageTool localhost:8010)
-app.post("/api/grammar-check", async (req, res) => {
-  const { text } = req.body;
-
-  if (!text || !text.trim()) {
-    return res.json({ corrected: text || "", hasErrors: false });
-  }
-
-  try {
-    const params = new URLSearchParams();
-    params.append("text", text.trim());
-    params.append("language", "en-US");
-
-    const ltRes = await fetch("http://localhost:8010/v2/check", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
-    });
-
-    const data = await ltRes.json();
-    const matches = data?.matches || [];
-
-    if (!matches.length) {
-      return res.json({ corrected: text, hasErrors: false });
-    }
-
-    let corrected = text;
-    const sorted = [...matches].sort((a, b) => b.offset - a.offset);
-
-    for (const m of sorted) {
-      const replacement = m.replacements?.[0]?.value;
-      if (!replacement) continue;
-
-      corrected =
-        corrected.slice(0, m.offset) +
-        replacement +
-        corrected.slice(m.offset + m.length);
-    }
-
-    res.json({
-      hasErrors: true,
-      corrected,
-      matches,
-    });
-  } catch (err) {
-    console.error("LanguageTool error:", err);
-    res.status(500).json({ corrected: text, hasErrors: false });
-  }
-});
-
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
-});
+app.listen(5000, () => console.log("✅ Server running on http://localhost:5000"));

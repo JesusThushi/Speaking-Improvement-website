@@ -12,12 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.6",
-    "dotenv": "^17.2.4",
     "express": "^5.2.1",
-    "mongoose": "^8.0.0",
     "multer": "^2.0.2",
-    "openai": "^6.17.0",
-    "ws": "^8.19.0"
+    "mongoose": "^8.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

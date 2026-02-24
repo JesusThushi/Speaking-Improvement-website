@@ -1,0 +1,207 @@
+/* Attractive Hesitation Popup (separate CSS) */
+
+.hp-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  animation: hpFadeIn 160ms ease-out;
+}
+
+@keyframes hpFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.hp-modal {
+  width: min(560px, 96vw);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  background: rgba(20, 22, 33, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  transform: translateY(6px) scale(0.985);
+  animation: hpPop 180ms ease-out forwards;
+  color: #fff;
+}
+
+@keyframes hpPop {
+  to { transform: translateY(0) scale(1); }
+}
+
+.hp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hp-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.hp-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.20), rgba(255,255,255,0.06));
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.hp-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.hp-close:hover {
+  background: rgba(255, 255, 255, 0.10);
+  transform: scale(1.03);
+}
+
+.hp-scoreRow {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+@media (max-width: 520px) {
+  .hp-scoreRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hp-scoreBox {
+  border-radius: 16px;
+  padding: 14px 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.10);
+  display: grid;
+  place-items: center;
+}
+
+.hp-scoreNum {
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hp-scoreSub {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+  letter-spacing: 0.4px;
+}
+
+.hp-meta {
+  display: grid;
+  gap: 10px;
+}
+
+.hp-pill {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  font-size: 13px;
+}
+
+.hp-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background: rgba(120, 255, 200, 0.95);
+  box-shadow: 0 0 0 4px rgba(120, 255, 200, 0.15);
+}
+
+.hp-tips {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.hp-tipsTitle {
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: 0.2px;
+}
+
+.hp-tipsList {
+  margin: 0;
+  padding-left: 18px;
+  opacity: 0.92;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.hp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.hp-btn {
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.hp-btn:hover {
+  transform: translateY(-1px);
+}
+
+.hp-btnGhost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.hp-btnGhost:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.hp-btnPrimary {
+  background: rgba(120, 255, 200, 0.18);
+  border-color: rgba(120, 255, 200, 0.35);
+  color: #fff;
+}
+
+.hp-btnPrimary:hover {
+  background: rgba(120, 255, 200, 0.25);
+}
+
+/* Optional small inline badge shown under timer */
+.hp-inlineBadge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
